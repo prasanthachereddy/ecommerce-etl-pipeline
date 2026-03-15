@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# AWS credentials — NEVER push these
+.aws/
+credentials
+*.pem
+*.key
+
+# Large data files — keep in S3 not GitHub
+data/raw/**/*.csv
+data/processed/
+*.parquet
+
+# IDE
+.idea/
+.vscode/
+*.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
