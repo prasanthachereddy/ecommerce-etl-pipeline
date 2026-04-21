@@ -1,0 +1,14 @@
+# Paste this content into .gitignore:
+# Airflow generated files
+logs/
+dags/output/
+__pycache__/
+*.pyc
+*.pyo
+.env
+# Large data files
+*.csv
+*.parquet
+# OS files
+.DS_Store
+Thumbs.db
