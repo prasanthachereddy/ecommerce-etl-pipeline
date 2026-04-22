@@ -196,8 +196,58 @@ GROUP BY c.category_name
 ORDER BY total_revenue_inr DESC;
 ```
 
+
+---
+## Architecture Overview
+
+```
+[Airflow DAG -- ecommerce_datagen_etl_pipeline]
+         |
+         ▼
+  S3 raw/ (CSV)  →  AWS Glue ETL (PySpark)  →  S3 clean/ (Parquet)  →  Athena (SQL analytics)
+         ↑                                              ↑
+    Glue Crawler (raw)                         Glue Crawler (clean)
+```
+
+> Apache Airflow orchestrates all steps end-to-end via Operators and Sensors.
+
 ---
 
+## Data Model
+
+The Glue ETL job writes cleaned data to S3 in Parquet format. The Glue Crawler registers the following tables in the Glue Data Catalog:
+
+**Fact Tables**
+- `processed_order_items` — core transaction records (quantity, price, FK to orders and products)
+- `processed_orders` — order-level records (status, customer, date)
+
+**Dimension Tables**
+- `processed_customers` — customer profiles (Indian locale)
+- `processed_products` — product catalog with prices
+- `processed_categories` — 7 product categories
+
+---
+
+## Performance Optimizations
+
+| Optimization | Reason |
+|---|---|
+| Parquet format for clean/ zone | Columnar storage reduces Athena scan size and cost |
+| DECIMAL casting in PySpark | Avoids floating-point precision errors in revenue calculations |
+| Glue Crawler on clean/ after ETL | Keeps Glue Data Catalog in sync with latest Parquet schema |
+| `mode=reschedule` on Sensors | Releases Airflow worker slots between polls — avoids slot starvation |
+
+---
+
+## Workflow Orchestration
+
+- Apache Airflow 2.9.0 runs locally via Docker (docker-compose)
+- DAG: `ecommerce_datagen_etl_pipeline` with 9 tasks
+- Operator + Sensor pattern used for all AWS steps (trigger → wait → next step)
+- XCom used to pass S3 output path between tasks
+- Pipeline can be scheduled (e.g. `@daily`) or triggered manually via Airflow UI
+
+---
 ## Skills Demonstrated
 
 - **Python** -- type hints, logging, error handling, Faker data generation, pandas
