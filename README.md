@@ -32,7 +32,19 @@ to demonstrate real-world data cleaning capabilities.
     Task 7: start_clean_crawler --> GlueCrawlerOperator --> Triggers processed_data_crawler on S3 clean/
     Task 8: wait_clean_crawler  --> GlueCrawlerSensor   --> Polls every 30s until crawler status = READY
     Task 9: run_athena_query    --> AthenaOperator      --> Runs revenue analytics SQL on clean tables
+
+
+    [Airflow DAG -- ecommerce_datagen_etl_pipeline]
+         |
+         ▼
+  S3 raw/ (CSV)  →  AWS Glue ETL (PySpark)  →  S3 clean/ (Parquet)  →  Athena (SQL analytics)
+         ↑                                              ↑
+    Glue Crawler (raw)                         Glue Crawler (clean)
 ```
+
+> Apache Airflow orchestrates all steps end-to-end via Operators and Sensors.
+
+---
 
 ---
 
@@ -195,22 +207,6 @@ WHERE o.order_status = 'completed'
 GROUP BY c.category_name
 ORDER BY total_revenue_inr DESC;
 ```
-
-
----
-## Architecture Overview
-
-```
-[Airflow DAG -- ecommerce_datagen_etl_pipeline]
-         |
-         ▼
-  S3 raw/ (CSV)  →  AWS Glue ETL (PySpark)  →  S3 clean/ (Parquet)  →  Athena (SQL analytics)
-         ↑                                              ↑
-    Glue Crawler (raw)                         Glue Crawler (clean)
-```
-
-> Apache Airflow orchestrates all steps end-to-end via Operators and Sensors.
-
 ---
 
 ## Data Model
